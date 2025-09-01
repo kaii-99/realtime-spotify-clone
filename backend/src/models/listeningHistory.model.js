@@ -20,4 +20,4 @@ const listeningHistorySchema = new mongoose.Schema(
 	{ timestamps: true }
 );
 
-export const ListeningHistory = mongoose.model("ListeningHistory", listeningHistorySchema);
+export const ListeningHistory = mongoose.model("ListeningHistory", listeningHistorySchema, "listeninghistories");
