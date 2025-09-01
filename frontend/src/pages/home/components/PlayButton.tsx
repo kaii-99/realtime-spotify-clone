@@ -2,14 +2,35 @@ import { Button } from "@/components/ui/button";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Song } from "@/types";
 import { Pause, Play } from "lucide-react";
+import { useUser } from "@clerk/clerk-react"; 
+import { axiosInstance } from "@/lib/axios";
+
+const recordListening = async (songId: string, clerkId: string) => {
+	try {
+		await axiosInstance.post("/listen-history", {
+			songId,
+			clerkId, // or omit if using auth in backend
+		});
+	} catch (error: any) {
+		console.error("Failed to record listening:", error.message);
+	}
+};
 
 const PlayButton = ({ song }: { song: Song }) => {
 	const { currentSong, isPlaying, setCurrentSong, togglePlay } = usePlayerStore();
 	const isCurrentSong = currentSong?._id === song._id;
+	const { user } = useUser();
 
-	const handlePlay = () => {
-		if (isCurrentSong) togglePlay();
-		else setCurrentSong(song);
+	const handlePlay = async() => {
+		if (isCurrentSong) {
+			togglePlay();
+		} else {
+			setCurrentSong(song);
+
+			if (user?.id) {
+				recordListening(song._id, user.id);
+			}
+		}
 	};
 
 	return (
