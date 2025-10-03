@@ -21,6 +21,9 @@ interface NewSong {
 	artist: string;
 	album: string;
 	duration: string;
+	genre: string;
+	language: string;
+	type: string;
 }
 
 const AddSongDialog = () => {
@@ -33,6 +36,9 @@ const AddSongDialog = () => {
 		artist: "",
 		album: "",
 		duration: "0",
+		genre: "",
+		language: "",
+		type: "",
 	});
 
 	const [files, setFiles] = useState<{ audio: File | null; image: File | null }>({
@@ -56,6 +62,9 @@ const AddSongDialog = () => {
 			formData.append("title", newSong.title);
 			formData.append("artist", newSong.artist);
 			formData.append("duration", newSong.duration);
+			formData.append("genre", newSong.genre);
+			formData.append("language", newSong.language);
+			formData.append("type", newSong.type);
 			if (newSong.album && newSong.album !== "none") {
 				formData.append("albumId", newSong.album);
 			}
@@ -74,6 +83,9 @@ const AddSongDialog = () => {
 				artist: "",
 				album: "",
 				duration: "0",
+				genre: "",
+				language: "",
+				type: "",
 			});
 
 			setFiles({
@@ -201,6 +213,68 @@ const AddSongDialog = () => {
 										{album.title}
 									</SelectItem>
 								))}
+							</SelectContent>
+						</Select>
+					</div>
+
+					{/* Genre */}
+					<div className="space-y-2">
+					  <label className="text-sm font-medium">Genre</label>
+					  <Select
+					    value={newSong.genre}
+					    onValueChange={(value) => setNewSong({ ...newSong, genre: value })}
+					  >
+					    <SelectTrigger className="bg-zinc-800 border-zinc-700">
+					      <SelectValue placeholder="Select genre" />
+					    </SelectTrigger>
+					    <SelectContent className="bg-zinc-800 border-zinc-700">
+					      <SelectItem value="Pop">Pop</SelectItem>
+					      <SelectItem value="Rock">Rock</SelectItem>
+					      <SelectItem value="Hip-Hop">Hip-Hop</SelectItem>
+						  <SelectItem value="Ballad">Ballad</SelectItem>
+					      <SelectItem value="Jazz">Jazz</SelectItem>
+					      <SelectItem value="Classical">Classical</SelectItem>
+					      <SelectItem value="Electronic">Electronic</SelectItem>
+					      <SelectItem value="Indie">Indie</SelectItem>
+					      <SelectItem value="Other">Other</SelectItem>
+					    </SelectContent>
+					  </Select>
+					</div>
+
+					{/* Language */}
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Language</label>
+						<Select
+							value={newSong.language}
+							onValueChange={(value) => setNewSong({ ...newSong, language: value })}
+						>
+							<SelectTrigger className="bg-zinc-800 border-zinc-700">
+								<SelectValue placeholder="Select language" />
+							</SelectTrigger>
+							<SelectContent className="bg-zinc-800 border-zinc-700">
+								<SelectItem value="English">English</SelectItem>
+								<SelectItem value="Mandarin">Mandarin</SelectItem>
+								<SelectItem value="Korean">Korean</SelectItem>
+								<SelectItem value="Japanese">Japanese</SelectItem>
+								<SelectItem value="Malay">Malay</SelectItem>
+								<SelectItem value="Other">Other</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+
+					{/* Type */}
+					<div className="space-y-2">
+						<label className="text-sm font-medium">Type</label>
+						<Select
+							value={newSong.type}
+							onValueChange={(value) => setNewSong({ ...newSong, type: value })}
+						>
+							<SelectTrigger className="bg-zinc-800 border-zinc-700">
+								<SelectValue placeholder="Select Type" />
+							</SelectTrigger>
+							<SelectContent className="bg-zinc-800 border-zinc-700">
+								<SelectItem value="Normal">Normal</SelectItem>
+								<SelectItem value="Instrumental">Instrumental</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
