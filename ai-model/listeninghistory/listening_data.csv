@@ -1,0 +1,24 @@
+user_id,song_id,timestamp,artist,title,genre,language,type
+6826ac32a203229bae696b8c,6826d6abc88f88d696315f8d,2025-05-16T08:46:46.818Z,Yoasobi,舞台に立って,Pop,Japanese,Instrumental
+6826ac32a203229bae696b8c,6826ece55e56db0c7cdc2a76,2025-05-16T08:45:59.891Z,FLOW,Sign,Ballad,Japanese,Normal
+6826ac32a203229bae696b8c,6826d6abc88f88d696315f8d,2025-05-16T08:27:38.675Z,Yoasobi,舞台に立って,Pop,Japanese,Instrumental
+6826ac32a203229bae696b8c,6826d6abc88f88d696315f8d,2025-08-06T08:36:26.586Z,Yoasobi,舞台に立って,Pop,Japanese,Instrumental
+6826ac32a203229bae696b8c,68b546380d3e2ed9d34d0660,2025-09-01T08:49:07.497Z,JJ Lin,那些你很冒險的夢,Ballad,Mandarin,Normal
+68b546eb0d3e2ed9d34d0672,6826ece55e56db0c7cdc2a76,2025-09-01T08:57:49.957Z,FLOW,Sign,Ballad,Japanese,Normal
+68b546eb0d3e2ed9d34d0672,68b546380d3e2ed9d34d0660,2025-09-01T08:58:38.583Z,JJ Lin,那些你很冒險的夢,Ballad,Mandarin,Normal
+6826ac32a203229bae696b8c,6826d6abc88f88d696315f8d,2025-10-03T06:44:57.370Z,Yoasobi,舞台に立って,Pop,Japanese,Instrumental
+6826ac32a203229bae696b8c,6826ece55e56db0c7cdc2a76,2025-10-03T06:47:25.527Z,FLOW,Sign,Ballad,Japanese,Normal
+6826ac32a203229bae696b8c,68b546380d3e2ed9d34d0660,2025-10-03T06:51:07.501Z,JJ Lin,那些你很冒險的夢,Ballad,Mandarin,Normal
+6826ac32a203229bae696b8c,68b546380d3e2ed9d34d0660,2025-10-03T07:27:56.247Z,JJ Lin,那些你很冒險的夢,Ballad,Mandarin,Normal
+6826ac32a203229bae696b8c,68df798676970824ed113fc1,2025-10-03T07:35:59.300Z,Jay Chou,晴天,Pop,Mandarin,Normal
+6826ac32a203229bae696b8c,68df792c76970824ed113fa1,2025-10-03T07:36:06.553Z,Jay Chou,紅模仿,Hip-Hop,Mandarin,Normal
+6826ac32a203229bae696b8c,68df97daeee6f3e299741e2d,2025-10-03T09:31:26.381Z,Maroon 5,Girls like you,Pop,English,Normal
+68b546eb0d3e2ed9d34d0672,68df706aa3bd292ad27fbc12,2025-10-19T05:44:21.239Z,JJ Lin,修煉愛情,Jazz,Mandarin,Normal
+68b546eb0d3e2ed9d34d0672,6826d6abc88f88d696315f8d,2025-10-19T07:46:34.118Z,Yoasobi,舞台に立って,Pop,Japanese,Instrumental
+6826ac32a203229bae696b8c,68df94dbeee6f3e299741dd5,2025-10-19T07:47:56.969Z,Bruno Mars,Locked Out Of Heaven,Rock,English,Normal
+6826ac32a203229bae696b8c,68df761876970824ed113f75,2025-10-19T07:48:23.401Z,JJ Lin,I Am Alive,Indie,English,Normal
+6826ac32a203229bae696b8c,68df996feee6f3e299741e47,2025-10-19T07:48:39.551Z,Maroon 5,Animal,Indie,English,Normal
+6826ac32a203229bae696b8c,68df7d92ef4a82e60a0537d5,2025-10-19T07:48:55.367Z,Jay Chou,退後,Ballad,Mandarin,Normal
+6826ac32a203229bae696b8c,68df962deee6f3e299741e09,2025-10-19T07:49:10.216Z,Bruno Mars,Just the way you are,Pop,English,Normal
+6826ac32a203229bae696b8c,68df9538eee6f3e299741df2,2025-10-19T07:49:21.793Z,Bruno Mars,Uptown Funk,Electronic,English,Normal
+68b546eb0d3e2ed9d34d0672,68df798676970824ed113fc1,2025-10-19T07:58:33.460Z,Jay Chou,晴天,Pop,Mandarin,Normal
