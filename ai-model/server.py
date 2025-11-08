@@ -6,7 +6,7 @@ from weather_detection.weather_mood import detect_mood_from_weather
 app = Flask(__name__)
 
 # Load the trained model data
-model_data = joblib.load("trained_model.pkl")
+model_data = joblib.load("allsong/trained_model.pkl")
 similarity_matrix = model_data["similarity_matrix"]
 song_id_to_index = model_data["song_id_to_index"]
 index_to_song_id = model_data["index_to_song_id"]

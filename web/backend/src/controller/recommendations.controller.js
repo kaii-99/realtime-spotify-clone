@@ -9,8 +9,10 @@ export const getRecommendations = async (req, res) => {
       return res.status(400).json({ message: "songIds query parameter is required" });
     }
 
+    const AI_API_URL = process.env.AI_MODEL_URL || "http://localhost:4000";
+
     // 🔹 Call Python model API
-    const aiResponse = await axios.get("http://localhost:4000/recommendations", {
+    const aiResponse = await axios.get(`${AI_API_URL}/recommendations`, {
       params: { songIds },
     });
 
