@@ -24,7 +24,7 @@ export const getRecommendations = async (req, res) => {
 
     res.json(recommendedSongs);
   } catch (error) {
-    console.error("AI_MODEL_URL: ",AI_MODEL_URL);
+    console.error("AI_MODEL_URL: ",AI_API_URL);
     console.error("Error in getRecommendations:", error);
     res.status(500).json({ message: "Internal server error" });
   }
