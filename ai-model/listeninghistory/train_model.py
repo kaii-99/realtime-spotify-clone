@@ -36,7 +36,7 @@ similarity_matrix = cosine_similarity(song_features_matrix)
 song_id_to_index = {song_id: idx for idx, song_id in enumerate(song_features["song_id"].values)}
 index_to_song_id = {idx: song_id for song_id, idx in song_id_to_index.items()}
 
-# 5️⃣ Save everything needed for recommendations
+# Save everything needed for recommendations
 joblib.dump({
     "similarity_matrix": similarity_matrix,
     "song_id_to_index": song_id_to_index,
