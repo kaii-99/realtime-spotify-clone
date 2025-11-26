@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+import os
 import joblib
 import numpy as np
 from weather_detection.weather_mood import detect_mood_from_weather
@@ -47,4 +48,5 @@ def recommend():
     return jsonify(recommended_song_ids)
 
 if __name__ == "__main__":
-    app.run(port=4000)
+    port = int(os.environ.get("PORT", 4000))
+    app.run(host="0.0.0.0", port=port)
