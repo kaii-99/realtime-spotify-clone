@@ -14,6 +14,7 @@ export const createGroupPlaylist = async (req, res) => {
     const playlist = await GroupPlaylist.create({
       name,
       members,
+      songs: []
     });
 
     res.status(201).json(playlist);
@@ -66,5 +67,27 @@ export const addSongToGroupPlaylist = async (req, res) => {
   } catch (error) {
     console.error("Add song error:", error);
     res.status(500).json({ message: "Failed to add song" });
+  }
+};
+
+/**
+ *  Fetch song from group playlist
+ */
+export const fetchSongGroupPlaylists = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const playlist = await GroupPlaylist.findById(groupId)
+      .populate("songs")      // get full song info
+
+    if (!playlist) {
+      return res.status(404).json({ message: "Group playlist not found" });
+    }
+
+    res.status(200).json(playlist);
+
+  } catch (error) {
+    console.error("Fetch song group playlist error:", error);
+    res.status(500).json({ message: "Failed to fetch songs from group playlist" });
   }
 };

@@ -13,6 +13,8 @@ interface ChatStore {
 	userActivities: Map<string, string>;
 	messages: Message[];
 	selectedUser: User | null;
+	groupPlaylists: any[];
+	groupPlaylistSongs: any[];
 
 	fetchUsers: () => Promise<void>;
 	initSocket: (userId: string) => void;
@@ -20,6 +22,11 @@ interface ChatStore {
 	sendMessage: (receiverId: string, senderId: string, content: string) => void;
 	fetchMessages: (userId: string) => Promise<void>;
 	setSelectedUser: (user: User | null) => void;
+
+	createGroupPlaylist: (data: { name: string; members: string[]; user: string }) => Promise<void>;
+	fetchGroupPlaylist: (data: { user: string }) => Promise<void>;
+	FetchSongGroupPlaylist: (data: { groupId: string }) => Promise<void>;
+	AddSongGroupPlaylist: (data: { groupId: string, songId: string }) => Promise<void>;
 }
 
 const baseURL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
@@ -39,6 +46,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 	userActivities: new Map(),
 	messages: [],
 	selectedUser: null,
+	groupPlaylists: [],
+	groupPlaylistSongs: [],
 
 	setSelectedUser: (user) => set({ selectedUser: user }),
 
@@ -132,4 +141,89 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 			set({ isLoading: false });
 		}
 	},
+
+	createGroupPlaylist: async ({ name, members, user }) => {
+		const clerkId = user
+		set({ isLoading: true, error: null });
+
+		try {
+			const userRes = await axiosInstance.get(`/users/clerk/${clerkId}`);
+			const userId = userRes.data._id;
+			const updatedMembers = [...members, userId];
+
+			await axiosInstance.post("/group-playlists", { 
+				name, 
+				members: updatedMembers,
+			});
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to create group playlist",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	fetchGroupPlaylist: async ({ user }) => {
+		const clerkId = user
+		console.log("Backend User:", clerkId)
+		set({ isLoading: true, error: null });
+
+		try {
+			const userRes = await axiosInstance.get(`/users/clerk/${clerkId}`);
+			const userId = userRes.data._id;
+
+			const res = await axiosInstance.get(`/group-playlists/${userId}`);
+			set({ groupPlaylists: res.data });
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to create group playlist",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	FetchSongGroupPlaylist: async ({ groupId }) => {
+		set({ isLoading: true, error: null });
+
+		try {
+			const res = await axiosInstance.get(`/group-playlists/fetchsong/${groupId}`);
+			set({ groupPlaylistSongs: res.data });
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to fetch group playlist songs",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	AddSongGroupPlaylist: async ({ groupId, songId }) => {
+		set({ isLoading: true, error: null });
+
+		try {
+			await axiosInstance.patch(`/group-playlists/${groupId}/add-song`, { 
+				songId: songId,
+			});
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to add song to group playlist",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	}
 }));

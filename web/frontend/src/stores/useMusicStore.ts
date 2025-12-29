@@ -15,6 +15,10 @@ interface MusicStore {
 	stats: Stats;
 	recommendedSongs: Song[];
 	userHistory: Song[];
+	recommendedSongs_moodenhanced: Song[];
+	recommendedSongs_moodenhanced_DL: Song[];
+	recommendedSongs_groupplaylist: Song[];
+	recommendedSongs_groupplaylist_DL: Song[];
 
 	fetchAlbums: () => Promise<void>;
 	fetchAlbumById: (id: string) => Promise<void>;
@@ -27,6 +31,10 @@ interface MusicStore {
 	deleteAlbum: (id: string) => Promise<void>;
 	fetchRecommendations: (songIds: string[]) => Promise<void>;
 	fetchUserHistory: (userId: string) => Promise<void>;
+	fetchRecommendationsMoodEnhanced: (userId: string) => Promise<void>;
+	fetchRecommendationsMoodEnhanced_DL: (userId: string) => Promise<void>;
+	fetchRecommendationGroupPlaylist: (groupId: string) => Promise<void>;
+	fetchRecommendationGroupPlaylist_DL: (groupId: string) => Promise<void>;
 }
 
 export const useMusicStore = create<MusicStore>((set, get) => ({
@@ -46,6 +54,10 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
 	},
 	recommendedSongs: [],
 	userHistory: [],
+	recommendedSongs_moodenhanced: [],
+	recommendedSongs_moodenhanced_DL: [],
+	recommendedSongs_groupplaylist: [],
+	recommendedSongs_groupplaylist_DL: [],
 
 	deleteSong: async (id) => {
 		set({ isLoading: true, error: null });
@@ -185,27 +197,117 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
 	    }
 	  },
 
-	  fetchUserHistory: async (userId: string) => {
-  	    set({ isLoading: true, error: null });
-  	    try {
-  	      const response = await axiosInstance.get(`/listen-history/${userId}`);
-  	      const history = response.data; // your array of { songId, ... }
+	fetchUserHistory: async (userId: string) => {
+  	  	set({ isLoading: true, error: null });
+  	  	try {
+			const response = await axiosInstance.get(`/listen-history/${userId}`);
+			const history = response.data; // your array of { songId, ... }
 
-  		  // 2️⃣ Extract the song IDs
-  		  const songIds = history.map((item: any) => item.songId);
+  			// 2️⃣ Extract the song IDs
+  			const songIds = history.map((item: any) => item.songId);
 
-  		  // 3️⃣ Call the existing fetchRecommendations
-  		  if (songIds.length > 0) {
-  		    await get().fetchRecommendations(songIds);
-  		  } else {
-  		    set({ recommendedSongs: [] }); // no history, no recommendations
-  		  }
-  		} catch (error: any) {
-  		  console.error("Error fetching user history:", error);
-  		  toast.error("Failed to fetch user history");
-  		  set({ error: error.message });
-  		} finally {
-  		  set({ isLoading: false });
-  		}
-  	  },
+  	    	// 3️⃣ Call the existing fetchRecommendations
+  	    	if (songIds.length > 0) {
+  	    	  	await get().fetchRecommendations(songIds);
+  	    	} else {
+  	    	  	set({ recommendedSongs: [] }); // no history, no recommendations
+  	    	}
+  	  	} catch (error: any) {
+  	  		console.error("Error fetching user history:", error);
+  	  		toast.error("Failed to fetch user history");
+  	  		set({ error: error.message });
+  	  	} finally {
+  	  		set({ isLoading: false });
+  	  	}
+  	},
+
+	fetchRecommendationsMoodEnhanced: async (clerk_userId: string) => {
+		const clerkId = clerk_userId
+	    set({ isLoading: true, error: null });
+
+	    try {
+
+			const userRes = await axiosInstance.get(`/users/clerk/${clerkId}`);
+			const userId = userRes.data._id;
+
+	      	const response = await axiosInstance.get("/recommendations/moodenhanced", {
+	      	  params: { user_id: userId },
+	      	});
+		  
+	      	const recommendedIds: Song[] = response.data;
+
+		  	set({ recommendedSongs_moodenhanced: recommendedIds });
+	    } catch (error: any) {
+	      	console.error("Error fetching recommendations mood enhanced:", error);
+	      	toast.error("Failed to fetch recommendations mood enhanced");
+	      	set({ error: error.message });
+	    } finally {
+	      	set({ isLoading: false });
+	    }
+	},
+
+	fetchRecommendationsMoodEnhanced_DL: async (clerk_userId: string) => {
+		const clerkId = clerk_userId
+	    set({ isLoading: true, error: null });
+
+	    try {
+
+			const userRes = await axiosInstance.get(`/users/clerk/${clerkId}`);
+			const userId = userRes.data._id;
+
+	      	const response = await axiosInstance.get("/recommendations/moodenhanced_deeplearning", {
+	      	  params: { user_id: userId },
+	      	});
+		  
+	      	const recommendedIds: Song[] = response.data;
+
+		  	set({ recommendedSongs_moodenhanced_DL: recommendedIds });
+	    } catch (error: any) {
+	      	console.error("Error fetching recommendations mood enhanced:", error);
+	      	toast.error("Failed to fetch recommendations mood enhanced");
+	      	set({ error: error.message });
+	    } finally {
+	      	set({ isLoading: false });
+	    }
+	},
+
+	fetchRecommendationGroupPlaylist: async (groupId: string) => {
+	    set({ isLoading: true, error: null });
+
+	    try {
+			const res = await axiosInstance.get(`/recommendations/groupplaylist`, {
+				params: { group_id: groupId },
+			});
+			set({ recommendedSongs_groupplaylist: res.data });
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to fetch group playlist songs",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	fetchRecommendationGroupPlaylist_DL: async (groupId: string) => {
+	    set({ isLoading: true, error: null });
+
+	    try {
+			const res = await axiosInstance.get(`/recommendations/groupplaylist_deeplearning`, {
+				params: { group_id: groupId },
+			});
+			set({ recommendedSongs_groupplaylist_DL: res.data });
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to fetch group playlist DL songs",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
 }));

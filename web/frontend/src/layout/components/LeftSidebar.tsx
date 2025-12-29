@@ -7,6 +7,8 @@ import { SignedIn } from "@clerk/clerk-react";
 import { HomeIcon, Library, MessageCircle } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import AddGroupPlaylistDialog from "./AddGroupPlaylist";
+import GroupPlaylists from "./GroupPlaylist";
 
 const LeftSidebar = () => {
 	const { albums, fetchAlbums, isLoading } = useMusicStore();
@@ -54,7 +56,7 @@ const LeftSidebar = () => {
 			</div>
 
 			{/* Library section */}
-			<div className='flex-1 rounded-lg bg-zinc-900 p-4'>
+			<div className='h-[30vh] rounded-lg bg-zinc-900 p-4'>
 				<div className='flex items-center justify-between mb-4'>
 					<div className='flex items-center text-white px-2'>
 						<Library className='size-5 mr-2' />
@@ -87,6 +89,22 @@ const LeftSidebar = () => {
 							))
 						)}
 					</div>
+				</ScrollArea>
+			</div>
+
+			{/* Group Playlist */}
+			<div className='flex-1 rounded-lg bg-zinc-900 p-4'>
+				<div className='flex items-center justify-between mb-4'>
+					<div className='flex items-center text-white px-2'>
+						<Library className='size-5 mr-2' />
+						<span className='hidden md:inline'>Group Playlists</span>
+					</div>
+
+					<AddGroupPlaylistDialog/>
+				</div>
+
+				<ScrollArea className='h-[calc(100vh-300px)]'>
+					<GroupPlaylists />
 				</ScrollArea>
 			</div>
 		</div>

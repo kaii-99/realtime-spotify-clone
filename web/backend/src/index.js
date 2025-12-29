@@ -20,6 +20,7 @@ import statRoutes from "./routes/stat.route.js";
 import listenHistoryRoutes from "./routes/history.routes.js";
 import exportRoutes from "./routes/export.route.js";
 import recommendationsRoutes from "./routes/recommendations.routes.js";
+import groupPlaylistRoutes from "./routes/groupPlaylist.route.js"
 
 dotenv.config();
 
@@ -75,8 +76,7 @@ app.use("/api/stats", statRoutes);
 app.use("/api/listen-history", listenHistoryRoutes);
 app.use("/api/export", exportRoutes);
 app.use("/api/recommendations", recommendationsRoutes);
-
-
+app.use("/api/group-playlists", groupPlaylistRoutes);
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "../frontend/dist")));

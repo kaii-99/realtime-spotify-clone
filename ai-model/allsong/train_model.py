@@ -41,6 +41,8 @@ joblib.dump({
     "similarity_matrix": similarity_matrix,
     "song_id_to_index": song_id_to_index,
     "index_to_song_id": index_to_song_id,
+    "song_features": song_features,
+    "encoder": encoder
 }, "trained_model.pkl")
 
 print("✅ Model trained and saved as trained_model.pkl")

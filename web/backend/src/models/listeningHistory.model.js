@@ -16,6 +16,8 @@ const listeningHistorySchema = new mongoose.Schema(
 			type: Date,
 			default: Date.now,
 		},
+		weather: { type: String }, 
+  		timeOfDay: { type: String }
 	},
 	{ timestamps: true }
 );

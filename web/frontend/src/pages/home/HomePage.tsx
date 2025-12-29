@@ -6,6 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import SectionGrid from "./components/SectionGrid";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import RecommendationSection from "./components/RecommendationSection";
+import RecommendationMoodEnhancedSection from "./components/RecommendationMoodEnhanced";
+import RecommendationMoodEnhancedSection_DL from "./components/RecommendationMoodEnhancedDL";
 
 const HomePage = () => {
 	const {
@@ -45,6 +47,10 @@ const HomePage = () => {
 					<FeaturedSection />
 					<h2>Recommended</h2>
 					<RecommendationSection />
+					<h2>Recommended Mood Enhanced</h2>
+					<RecommendationMoodEnhancedSection />
+					<h2>Recommended Mood Enhanced DL</h2>
+					<RecommendationMoodEnhancedSection_DL />
 
 					<div className='space-y-8'>
 						<SectionGrid title='Made For You' songs={madeForYouSongs} isLoading={isLoading} />

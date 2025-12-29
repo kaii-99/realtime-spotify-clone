@@ -48,14 +48,25 @@ def detect_mood_from_weather(city):
     if not weather_data:
         return None
     
+    response = requests.get(
+        f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric"
+    ).json()
+    
     weather_main, _ = weather_data
     mood = weather_to_mood(weather_main)
     genres = mood_to_genres(mood)
+
+    current_time = response["dt"]
+    sunrise = response["sys"]["sunrise"]
+    sunset = response["sys"]["sunset"]
+
+    time_of_day = "day" if sunrise <= current_time < sunset else "night"
     
     return {
         "weather": weather_main,
         "mood": mood,
-        "recommended_genres": genres
+        "recommended_genres": genres,
+        "time_of_day": time_of_day
     }
 
 if __name__ == "__main__":
