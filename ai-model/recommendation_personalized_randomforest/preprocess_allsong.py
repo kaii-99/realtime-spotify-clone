@@ -28,4 +28,4 @@ joblib.dump(type_enc, "type_encoder.pkl")
 
 # Save processed dataset
 df.to_csv("all_songs_encoded.csv", index=False)
-print("✅ Processed data saved to all_songs_encoded.csv")
+print("Processed data saved to all_songs_encoded.csv")

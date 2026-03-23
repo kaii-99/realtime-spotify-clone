@@ -6,6 +6,40 @@ import requests
 
 all_songs = pd.read_csv("group_playlist_randomforest/all_songs_encoded.csv")
 
+def set_files(user_id):
+
+    global model, explainer
+
+    model_path = os.path.join("group_playlist_randomforest/model", user_id, "song_recommendation_model.pkl")
+    model = joblib.load(model_path)
+
+def filter_songs_for_user():
+
+    candidate_songs = all_songs.copy().reset_index(drop=True)
+
+    inputs_df = candidate_songs[
+        ["genre_encoded", "language_encoded", "type_encoded"]
+    ]
+
+    return candidate_songs, inputs_df
+
+def score_songs(candidate_songs, inputs_df):
+    probs_all = model.predict_proba(inputs_df)
+
+    # Use confidence as score
+    scores = probs_all.max(axis=1)
+
+    candidate_songs["score"] = scores
+    return candidate_songs
+
+def get_user_song_scores(user_id):
+    set_files(user_id)
+
+    candidate_songs, inputs_df = filter_songs_for_user()
+    scored = score_songs(candidate_songs, inputs_df)
+
+    return scored[["song_id", "score"]]
+
 def fetch_group_members(group_id):
     url = f"http://localhost:5000/api/export/group_member/{group_id}"
     res = requests.get(url)
@@ -42,30 +76,35 @@ def recommend_songs_for_group_ml(group_id, top_n=10, alpha=0.7):
 
     all_user_scores = []
 
-    for user_id in members:
-        model_path = os.path.join("group_playlist_randomforest/model", user_id, "song_recommendation_model.pkl")
-        if not os.path.exists(model_path):
-            print(f"No ML model for user {user_id}")
-            continue
+    #for user_id in members:
+    #    model_path = os.path.join("group_playlist_randomforest/model", user_id, "song_recommendation_model.pkl")
+    #    if not os.path.exists(model_path):
+    #        print(f"No ML model for user {user_id}")
+    #        continue
+#
+    #    model = joblib.load(model_path)
+#
+    #    # Use same song pool for everyone
+    #    candidate_songs = all_songs.copy().reset_index(drop=True)
+    #    inputs_df = candidate_songs[
+    #        ["genre_encoded", "language_encoded", "type_encoded"]
+    #    ]
+#
+    #    probs = model.predict_proba(inputs_df)
+    #    scores = probs.max(axis=1)  # confidence score
+#
+    #    user_scores = candidate_songs[["song_id"]].copy()
+    #    user_scores["score"] = scores
+#
+    #    all_user_scores.append(user_scores)
 
-        model = joblib.load(model_path)
-
-        # Use same song pool for everyone
-        candidate_songs = all_songs.copy().reset_index(drop=True)
-        inputs_df = candidate_songs[
-            ["genre_encoded", "language_encoded", "type_encoded"]
-        ]
-
-        probs = model.predict_proba(inputs_df)
-        scores = probs.max(axis=1)  # confidence score
-
-        user_scores = candidate_songs[["song_id"]].copy()
-        user_scores["score"] = scores
-
-        all_user_scores.append(user_scores)
+    for uid in members:
+        scores = get_user_song_scores(uid)
+        if scores is not None:
+            all_user_scores.append(scores)
 
     if len(all_user_scores) < 2:
-        print("⚠️ Not enough users with models")
+        print("Not enough users with models")
         return []
 
     group_scores = aggregate_group_scores(all_user_scores, alpha)

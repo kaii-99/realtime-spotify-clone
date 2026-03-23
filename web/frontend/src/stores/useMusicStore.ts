@@ -19,6 +19,8 @@ interface MusicStore {
 	recommendedSongs_moodenhanced_DL: Song[];
 	recommendedSongs_groupplaylist: Song[];
 	recommendedSongs_groupplaylist_DL: Song[];
+	recommendedSongs_hybrid: Song[];
+	recommendedSongs_hybrid_DL: Song[];
 
 	fetchAlbums: () => Promise<void>;
 	fetchAlbumById: (id: string) => Promise<void>;
@@ -35,6 +37,8 @@ interface MusicStore {
 	fetchRecommendationsMoodEnhanced_DL: (userId: string) => Promise<void>;
 	fetchRecommendationGroupPlaylist: (groupId: string) => Promise<void>;
 	fetchRecommendationGroupPlaylist_DL: (groupId: string) => Promise<void>;
+	fetchRecommendationHybridlist: (groupId: string) => Promise<void>;
+	fetchRecommendationHybridlist_DL: (groupId: string) => Promise<void>;
 }
 
 export const useMusicStore = create<MusicStore>((set, get) => ({
@@ -58,6 +62,8 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
 	recommendedSongs_moodenhanced_DL: [],
 	recommendedSongs_groupplaylist: [],
 	recommendedSongs_groupplaylist_DL: [],
+	recommendedSongs_hybrid: [],
+	recommendedSongs_hybrid_DL: [],
 
 	deleteSong: async (id) => {
 		set({ isLoading: true, error: null });
@@ -303,6 +309,45 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
 		} catch (error: any) {
 			set({
 				error: error?.response?.data?.message || "Failed to fetch group playlist DL songs",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+	fetchRecommendationHybridlist: async (groupId: string) => {
+	    set({ isLoading: true, error: null });
+
+	    try {
+			const res = await axiosInstance.get(`/recommendations/hybrid`, {
+				params: { group_id: groupId },
+			});
+			set({ recommendedSongs_hybrid: res.data });
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to fetch hybrid songs",
+			});
+			throw error;
+
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	fetchRecommendationHybridlist_DL: async (groupId: string) => {
+	    set({ isLoading: true, error: null });
+
+	    try {
+			const res = await axiosInstance.get(`/recommendations/hybrid_deeplearning`, {
+				params: { group_id: groupId },
+			});
+			set({ recommendedSongs_hybrid_DL: res.data });
+
+		} catch (error: any) {
+			set({
+				error: error?.response?.data?.message || "Failed to fetch hybrid DL songs",
 			});
 			throw error;
 

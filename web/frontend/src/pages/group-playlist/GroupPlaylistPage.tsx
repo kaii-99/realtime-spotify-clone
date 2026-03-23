@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { axiosInstance } from "@/lib/axios";
+//import { axiosInstance } from "@/lib/axios";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChatStore } from "@/stores/useChatStore";
 import { useMusicStore } from "@/stores/useMusicStore";
@@ -15,8 +15,10 @@ const GroupPlaylistPage = () => {
   const { 
     recommendedSongs_groupplaylist, fetchRecommendationGroupPlaylist, 
     recommendedSongs_groupplaylist_DL, fetchRecommendationGroupPlaylist_DL, 
+    recommendedSongs_hybrid, fetchRecommendationHybridlist,
+    recommendedSongs_hybrid_DL, fetchRecommendationHybridlist_DL,
   } = useMusicStore();
-  const [recType, setRecType] = useState<"general" | "general_enhanced">(
+  const [recType, setRecType] = useState<"general" | "general_enhanced" | "mood" | "mood_enhanced">(
     "general"
   );
 
@@ -44,17 +46,29 @@ const GroupPlaylistPage = () => {
     if (id) {
       fetchRecommendationGroupPlaylist(id);
       fetchRecommendationGroupPlaylist_DL(id);
+      fetchRecommendationHybridlist(id);
+      fetchRecommendationHybridlist_DL(id);
     }
-  }, [id, fetchRecommendationGroupPlaylist, fetchRecommendationGroupPlaylist_DL]);
+  }, [id, fetchRecommendationGroupPlaylist, fetchRecommendationGroupPlaylist_DL, fetchRecommendationHybridlist, fetchRecommendationHybridlist_DL]);
 
   if (loading) return <p className="text-white p-4">Loading...</p>;
   if (error) return <p className="text-red-500 p-4">{error}</p>;
   if (!groupPlaylistSongs) return null;
 
-  const displayedRecommendations =
-  recType === "general"
-    ? recommendedSongs_groupplaylist
-    : recommendedSongs_groupplaylist_DL;
+  const displayedRecommendations = (() => {
+    switch (recType) {
+      case "general":
+        return recommendedSongs_groupplaylist;
+      case "general_enhanced":
+        return recommendedSongs_groupplaylist_DL;
+      case "mood":
+        return recommendedSongs_hybrid;
+      case "mood_enhanced":
+        return recommendedSongs_hybrid_DL;
+      default:
+        return [];
+    }
+  })();
 
   return (
     <div className="p-6 text-white">
@@ -95,13 +109,36 @@ const GroupPlaylistPage = () => {
               >
                 General Enhanced
               </button>
+
+              <button
+                onClick={() => setRecType("mood")}
+                className={`px-4 py-2 rounded-md border transition
+                  ${
+                    recType === "mood"
+                      ? "bg-green-600 border-green-500 text-white"
+                      : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white"
+                  }`}
+              >
+                Mood
+              </button>             
+              <button
+                onClick={() => setRecType("mood_enhanced")}
+                className={`px-4 py-2 rounded-md border transition
+                  ${
+                    recType === "mood_enhanced"
+                      ? "bg-green-600 border-green-500 text-white"
+                      : "bg-zinc-900 border-zinc-700 text-zinc-400 hover:text-white"
+                  }`}
+              >
+                Mood Enhanced
+              </button>
             </div>
                 
             {displayedRecommendations.length === 0 ? (
               <p className="text-zinc-500">No songs yet. Add one 👇</p>
             ) : (
               <div className="space-y-3">
-                {displayedRecommendations.map((song) => (
+                {displayedRecommendations.map((song, index) => (
                   <div
                     key={song._id}
                     className="relative group p-3 bg-zinc-900 rounded-md flex justify-between items-center"
@@ -110,7 +147,11 @@ const GroupPlaylistPage = () => {
                       <p className="font-medium">{song.title}</p>
                       <p className="text-sm text-zinc-400">{song.artist}</p>
                     </div>
-                    <PlayButton song={song} />
+                    <PlayButton
+                      song={song}
+                      queue={displayedRecommendations}
+                      index={index}
+                    />
                   </div>
                 ))}
               </div>

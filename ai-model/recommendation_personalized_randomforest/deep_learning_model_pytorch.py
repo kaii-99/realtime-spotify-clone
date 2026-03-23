@@ -7,6 +7,13 @@ import torch.nn as nn
 import torch.optim as optim
 import json
 
+#all users
+USER_IDS = {
+    "testuser1": "690f61b5822864ba799ef31d",
+    "testuser2": "690f6586822864ba799ef3a3",
+    "testuser3": "690f66bf822864ba799ef3fc"
+}
+
 def load_user_data(user_id):
     """Load processed user data and encoders from user folder"""
     USER_FOLDER = os.path.join("processed_data", user_id)
@@ -106,37 +113,40 @@ def recommend_songs(model, all_songs_df, weather_enc_val, time_enc_val, top_n=5)
     
     return top_songs
 
-# User-specific
-USER_ID = "690f6586822864ba799ef3a3"
+# User-specific (Test use !!!)
+#USER_ID = "690f6586822864ba799ef3a3"
 
 # Load data
-df, weather_enc, time_enc, genre_enc, language_enc, type_enc, song_enc, song_id_to_idx = load_user_data(USER_ID)
+#df, weather_enc, time_enc, genre_enc, language_enc, type_enc, song_enc, song_id_to_idx = load_user_data(USER_ID)
 all_songs = pd.read_csv("all_songs_encoded.csv")
 all_songs.columns = all_songs.columns.str.strip()
 
-# Train personalized model first
-num_songs = len(df["song_idx"].unique())
-model = train_model(df, num_songs=num_songs, epochs=20)
+for username, user_id in USER_IDS.items():
+    print(f"\nTraining PyTorch model for {username}")
 
-# Get all unique weather/time combinations from user's history
-unique_conditions = df[["weather_encoded", "timeOfDay_encoded"]].drop_duplicates()
+    try:
+        df, weather_enc, time_enc, genre_enc, language_enc, type_enc, song_enc, song_id_to_idx = load_user_data(user_id)
+    except Exception as e:
+        print(f"Skipping {username}: {e}")
+        continue
 
-for _, row in unique_conditions.iterrows():
-    weather_val = row["weather_encoded"]
-    time_val = row["timeOfDay_encoded"]
+    if len(df) < 10:
+        print(f"Not enough data for {username}, skipping")
+        continue
 
-    # Decode for display (optional)
-    weather_label = weather_enc.inverse_transform([weather_val])[0]
-    time_label = time_enc.inverse_transform([time_val])[0]
+    num_songs = df["song_idx"].nunique()
+    model = train_model(df, num_songs=num_songs, epochs=20)
 
-    top_songs = recommend_songs(model, all_songs, weather_val, time_val, top_n=5)
-    print(f"\nTop songs for Weather: {weather_label}, Time: {time_label}")
-    print(top_songs[["song_id", "score"]])
+    MODEL_FOLDER = os.path.join("model", user_id)
+    os.makedirs(MODEL_FOLDER, exist_ok=True)
 
-# Save the model
-torch.save(model.state_dict(), f"model/{USER_ID}/{USER_ID}_personalized_model_pytorch.pth")
+    # Save model
+    model_path = os.path.join(MODEL_FOLDER, f"{user_id}_personalized_model_pytorch.pth")
+    torch.save(model.state_dict(), model_path)
 
-# Save song-id mapping 
-encoded_to_original = dict(zip(df["song_idx"], df["song_id_encoded"]))
-with open(f"model/{USER_ID}/{USER_ID}_song_mapping.json", "w") as f:
-    json.dump(encoded_to_original, f)
+    # Save song-id mapping 
+    encoded_to_original = dict(zip(df["song_idx"], df["song_id_encoded"]))
+    with open(os.path.join(MODEL_FOLDER, f"{user_id}_song_mapping.json"), "w") as f:
+        json.dump(encoded_to_original, f)
+
+    print(f"Saved PyTorch model + mapping for {username}")

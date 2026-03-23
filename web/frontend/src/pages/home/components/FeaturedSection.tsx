@@ -11,7 +11,7 @@ const FeaturedSection = () => {
 
 	return (
 		<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8'>
-			{featuredSongs.map((song) => (
+			{featuredSongs.map((song, index) => (
 				<div
 					key={song._id}
 					className='flex items-center bg-zinc-800/50 rounded-md overflow-hidden
@@ -26,7 +26,11 @@ const FeaturedSection = () => {
 						<p className='font-medium truncate'>{song.title}</p>
 						<p className='text-sm text-zinc-400 truncate'>{song.artist}</p>
 					</div>
-					<PlayButton song={song} />
+					<PlayButton
+          			  	song={song}
+          			  	queue={featuredSongs}
+          			  	index={index}
+          			/>
 				</div>
 			))}
 		</div>

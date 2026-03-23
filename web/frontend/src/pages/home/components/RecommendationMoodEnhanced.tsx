@@ -2,6 +2,7 @@ import { useMusicStore } from "@/stores/useMusicStore";
 import { useEffect } from "react";
 import PlayButton from "./PlayButton";
 import { useUser } from "@clerk/clerk-react"; 
+import { usePlayerStore } from "@/stores/usePlayerStore";
 
 const RecommendationMoodEnhancedSection = () => {
   const { recommendedSongs_moodenhanced, fetchRecommendationsMoodEnhanced } = useMusicStore();
@@ -17,7 +18,7 @@ const RecommendationMoodEnhancedSection = () => {
 
   return (
     <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8'>
-      {recommendedSongs_moodenhanced.map((song) => (
+      {recommendedSongs_moodenhanced.map((song, index) => (
         <div
           key={song._id}
           className='flex items-center bg-zinc-800/50 rounded-md overflow-hidden
@@ -32,7 +33,11 @@ const RecommendationMoodEnhancedSection = () => {
             <p className='font-medium truncate'>{song.title}</p>
             <p className='text-sm text-zinc-400 truncate'>{song.artist}</p>
           </div>
-          <PlayButton song={song} />
+          <PlayButton
+            song={song}
+            queue={recommendedSongs_moodenhanced}
+            index={index}
+          />
         </div>
       ))}
     </div>

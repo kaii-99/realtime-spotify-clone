@@ -35,7 +35,7 @@ for filename in os.listdir(INPUT_FOLDER):
     df = pd.read_csv(INPUT_FILE)
 
     if df.empty:
-        print("⚠️ No data, skipped")
+        print("No data, skipped")
         continue
 
     # Keep only non-mood columns

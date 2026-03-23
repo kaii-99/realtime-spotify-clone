@@ -21,7 +21,7 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 			</div>
 
 			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-				{songs.map((song) => (
+				{songs.map((song, index) => (
 					<div
 						key={song._id}
 						className='bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer'
@@ -35,7 +35,11 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 									group-hover:scale-105'
 								/>
 							</div>
-							<PlayButton song={song} />
+							<PlayButton
+          					  	song={song}
+          					  	queue={songs}
+          					  	index={index}
+          					/>
 						</div>
 						<h3 className='font-medium mb-2 truncate'>{song.title}</h3>
 						<p className='text-sm text-zinc-400 truncate'>{song.artist}</p>

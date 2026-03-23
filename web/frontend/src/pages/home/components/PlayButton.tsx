@@ -16,21 +16,29 @@ const recordListening = async (songId: string, clerkId: string) => {
 	}
 };
 
-const PlayButton = ({ song }: { song: Song }) => {
-	const { currentSong, isPlaying, setCurrentSong, togglePlay } = usePlayerStore();
+const PlayButton = ({
+  song,
+  queue,
+  index,
+}: {
+  song: Song;
+  queue: Song[];
+  index: number;
+}) => {
+	const { currentSong, isPlaying, togglePlay, setQueueAndPlay } = usePlayerStore();
 	const isCurrentSong = currentSong?._id === song._id;
 	const { user } = useUser();
 
-	const handlePlay = async() => {
-		if (isCurrentSong) {
-			togglePlay();
-		} else {
-			setCurrentSong(song);
-
-			if (user?.id) {
-				recordListening(song._id, user.id);
-			}
-		}
+	const handlePlay = async () => {
+	  	if (isCurrentSong) {
+	  	  	togglePlay();
+	  	} else {
+	  	  	setQueueAndPlay(queue, index);
+			
+	  	  	if (user?.id) {
+	  	  	  	recordListening(song._id, user.id);
+	  	  	}
+	  	}
 	};
 
 	return (

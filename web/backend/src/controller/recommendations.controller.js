@@ -165,3 +165,71 @@ export const getRecommendations_GroupPlaylist_DL = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const getRecommendations_Hybrid = async (req, res) => {
+  try {
+    const { group_id } = req.query;
+
+    if (!group_id) {
+      return res.status(400).json({ message: "group_id query parameter is required" });
+    }
+
+    const AI_API_URL = process.env.AI_MODEL_URL || "http://localhost:4000";
+
+    // 🔹 Call Python model API
+    const aiResponse = await axios.get(`${AI_API_URL}/recommendations_hybrid`, {
+      params: { 
+        group_id,
+        city: req.query.city || "Singapore"
+      },
+    });
+
+    // AI model returns an array of recommended song IDs
+    const recommendedIds_hybrid = aiResponse.data.map(item => item.song_id);
+
+    console.log("IDs from AI:", recommendedIds_hybrid);
+    // Fetch full song objects from DB
+    const recommendedSongs_hybrid = await Song.find({
+      _id: { $in: recommendedIds_hybrid }
+    });
+
+    res.json(recommendedSongs_hybrid);
+  } catch (error) {
+    console.error("Error in getRecommendations_hybrid:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getRecommendations_Hybrid_DL = async (req, res) => {
+  try {
+    const { group_id } = req.query;
+
+    if (!group_id) {
+      return res.status(400).json({ message: "group_id query parameter is required" });
+    }
+
+    const AI_API_URL = process.env.AI_MODEL_URL || "http://localhost:4000";
+
+    // 🔹 Call Python model API
+    const aiResponse = await axios.get(`${AI_API_URL}/recommendations_hybrid_deeplearning`, {
+      params: { 
+        group_id,
+        city: req.query.city || "Singapore"
+      },
+    });
+
+    // AI model returns an array of recommended song IDs
+    const recommendedIds_hybrid = aiResponse.data.map(item => item.song_id);
+
+    console.log("IDs from AI:", recommendedIds_hybrid);
+    // Fetch full song objects from DB
+    const recommendedSongs_hybrid = await Song.find({
+      _id: { $in: recommendedIds_hybrid }
+    });
+
+    res.json(recommendedSongs_hybrid);
+  } catch (error) {
+    console.error("Error in getRecommendations_hybrid_DL:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};

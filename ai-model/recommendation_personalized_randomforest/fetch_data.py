@@ -6,31 +6,40 @@ import os
 # testuser2 -> 690f6586822864ba799ef3a3
 # testuser3 -> 690f66bf822864ba799ef3fc
 
-USER_ID = "690f6586822864ba799ef3a3"
+#USER_ID = "690f6586822864ba799ef3a3"
+#url = f"http://localhost:5000/api/export/listenhistory_mood/{USER_ID}"
 
-url = f"http://localhost:5000/api/export/listenhistory_mood/{USER_ID}"
+#all users
+USER_IDS = {
+    "testuser1": "690f61b5822864ba799ef31d",
+    "testuser2": "690f6586822864ba799ef3a3",
+    "testuser3": "690f66bf822864ba799ef3fc"
+}
 
-response = requests.get(url)
+BASE_URL = "http://localhost:5000/api/export/listenhistory_mood"
 
-if response.status_code != 200:
-    print("Error:", response.text)
-    exit()
-
-data = response.json()
-
-if len(data) == 0:
-    print("No data returned for this user.")
-    exit()
-
-df = pd.DataFrame(data)
-print(df.head())
-
-# ✅ Create folder if not exists
+# Create folder if not exists
 folder_name = "listening_history_data"
 os.makedirs(folder_name, exist_ok=True)
 
-# ✅ Save inside the new folder
-file_path = os.path.join(folder_name, f"{USER_ID}_listening_data.csv")
-df.to_csv(file_path, index=False)
+for username, user_id in USER_IDS.items():
+    url = f"{BASE_URL}/{user_id}"
+    response = requests.get(url)
 
-print(f"✅ Data saved to {file_path}")
+    if response.status_code != 200:
+        print(f"Error fetching {username}: {response.text}")
+        continue
+
+    data = response.json()
+
+    if not data:
+        print(f"No data for {username}")
+        continue
+
+    df = pd.DataFrame(data)
+
+    # Save inside the new folder
+    file_path = os.path.join(folder_name, f"{user_id}_listening_data.csv")
+    df.to_csv(file_path, index=False)
+
+    print(f"Saved {user_id} data to {file_path}")

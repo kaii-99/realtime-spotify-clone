@@ -9,6 +9,8 @@ from recommendation_personalized_randomforest.recommend_songs_for_user_deeplearn
 from recommendation_personalized_randomforest.recommend_songs_for_user_machinelearning import recommend_songs_for_user_ml
 from group_playlist_randomforest.recommend_songs_for_user_machinelearning import recommend_songs_for_group_ml
 from group_playlist_randomforest.deep_learning_model_pytorch_production import group_recommendation_DL
+from hybrid_randomforest.recommend_songs_for_user_machinelearning import recommend_songs_hybrid_ml
+from hybrid_randomforest.deep_learning_model_pytorch_production import hybrid_recommendation_DL
 
 app = Flask(__name__)
 
@@ -208,6 +210,46 @@ def recommend_groupplaylist_deeplearning():
     # Get top 10 recommendations
     recommended_songs = group_recommendation_DL(
         group_id=group_id,
+    )
+
+    return jsonify(recommended_songs.to_dict(orient="records"))
+
+@app.route("/recommendations_hybrid", methods=["GET"])
+def recommend_hybrid():
+    group_id = request.args.get("group_id")
+    city = request.args.get("city")
+
+    # Detect Mood
+    weather_data = detect_mood_from_weather(city) if city else None
+
+    if not weather_data:
+        return jsonify({"error": "Unable to detect weather/mood for city"}), 400
+    
+    # Get top 10 recommendations
+    recommended_songs = recommend_songs_hybrid_ml(
+        group_id=group_id,
+        weather=weather_data["weather"],
+        timeOfDay=weather_data["time_of_day"]
+    )
+
+    return jsonify(recommended_songs.to_dict(orient="records"))
+
+@app.route("/recommendations_hybrid_deeplearning", methods=["GET"])
+def recommend_hybrid_deeplearning():
+    group_id = request.args.get("group_id") 
+    city = request.args.get("city")
+
+    # Detect Mood
+    weather_data = detect_mood_from_weather(city) if city else None
+
+    if not weather_data:
+        return jsonify({"error": "Unable to detect weather/mood for city"}), 400
+
+    # Get top 10 recommendations
+    recommended_songs = hybrid_recommendation_DL(
+        group_id=group_id,
+        weather=weather_data["weather"],
+        timeOfDay=weather_data["time_of_day"]
     )
 
     return jsonify(recommended_songs.to_dict(orient="records"))
