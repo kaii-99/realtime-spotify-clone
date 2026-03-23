@@ -9,11 +9,11 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+//import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useMusicStore } from "@/stores/useMusicStore";
-import { Plus, Upload } from "lucide-react";
-import { useRef, useState } from "react";
+//import { useMusicStore } from "@/stores/useMusicStore";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useChatStore } from "@/stores/useChatStore";
 import { useUser } from "@clerk/clerk-react";

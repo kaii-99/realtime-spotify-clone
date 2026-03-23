@@ -3,6 +3,20 @@ import { Message, User } from "@/types";
 import { create } from "zustand";
 import { io } from "socket.io-client";
 
+interface GroupPlaylistSong {
+	id: string;
+	title: string;
+	artist?: string;
+	imageUrl?: string;
+	audioUrl?: string;
+}
+
+interface GroupPlaylist {
+	id: string;
+	name: string;
+	songs: GroupPlaylistSong[];
+}
+
 interface ChatStore {
 	users: User[];
 	isLoading: boolean;
@@ -14,7 +28,7 @@ interface ChatStore {
 	messages: Message[];
 	selectedUser: User | null;
 	groupPlaylists: any[];
-	groupPlaylistSongs: any[];
+	groupPlaylistSongs: GroupPlaylist | null;
 
 	fetchUsers: () => Promise<void>;
 	initSocket: (userId: string) => void;
@@ -47,7 +61,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 	messages: [],
 	selectedUser: null,
 	groupPlaylists: [],
-	groupPlaylistSongs: [],
+	groupPlaylistSongs: null,
 
 	setSelectedUser: (user) => set({ selectedUser: user }),
 
