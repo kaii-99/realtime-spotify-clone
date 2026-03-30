@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import os
 import requests
 
+BASE_API_URL = os.environ.get("BACKEND_URL")
 all_songs = pd.read_csv("all_songs_encoded.csv")
 genre_enc = joblib.load("genre_encoder.pkl")
 language_enc = joblib.load("language_encoder.pkl")
@@ -18,7 +19,7 @@ feature_names = [
 ]
 
 def fetch_group_members(group_id):
-    url = f"http://localhost:5000/api/export/group_member/{group_id}"
+    url = f"{BASE_API_URL}/api/export/group_member/{group_id}"
     res = requests.get(url)
 
     if res.status_code != 200:

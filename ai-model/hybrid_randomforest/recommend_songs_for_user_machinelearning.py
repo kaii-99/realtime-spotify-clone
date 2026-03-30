@@ -4,6 +4,7 @@ import joblib
 import os
 import requests
 
+BASE_API_URL = os.environ.get("BACKEND_URL")
 all_songs = pd.read_csv("hybrid_randomforest/all_songs_encoded.csv")
 
 def set_files(user_id):
@@ -65,7 +66,7 @@ def get_user_song_scores(user_id, weather, timeOfDay):
     return scored[["song_id", "score"]]
 
 def fetch_group_members(group_id):
-    url = f"http://localhost:5000/api/export/group_member/{group_id}"
+    url = f"{BASE_API_URL}/api/export/group_member/{group_id}"
     res = requests.get(url)
 
     if res.status_code != 200:

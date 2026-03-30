@@ -10,6 +10,8 @@ import shap
 import json
 import requests
 
+BASE_API_URL = os.environ.get("BACKEND_URL")
+
 # Model
 class RecommenderNN(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
@@ -26,7 +28,7 @@ class RecommenderNN(nn.Module):
         return self.net(x)
 
 def fetch_group_members(group_id):
-    url = f"http://localhost:5000/api/export/group_member/{group_id}"
+    url = f"{BASE_API_URL}/api/export/group_member/{group_id}"
     res = requests.get(url)
 
     if res.status_code != 200:
