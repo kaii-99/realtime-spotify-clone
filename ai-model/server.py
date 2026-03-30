@@ -194,22 +194,14 @@ def recommend_moodenhanced_hybrid():
 
 @app.route("/recommendations_groupplaylist", methods=["GET"])
 def recommend_groupplaylist():
-    try:
-        group_id = request.args.get("group_id")
+    group_id = request.args.get("group_id") 
 
-        print("Received group_id:", group_id)
+    # Get top 10 recommendations
+    recommended_songs = recommend_songs_for_group_ml(
+        group_id=group_id,
+    )
 
-        recommended_songs = recommend_songs_for_group_ml(
-            group_id=group_id,
-        )
-
-        print("Result:", recommended_songs)
-
-        return jsonify(recommended_songs.to_dict(orient="records"))
-
-    except Exception as e:
-        print("ERROR:", str(e))
-        return jsonify({"error": str(e)}), 500
+    return jsonify(recommended_songs.to_dict(orient="records"))
 
 @app.route("/recommendations_groupplaylist_deeplearning", methods=["GET"])
 def recommend_groupplaylist_deeplearning():
