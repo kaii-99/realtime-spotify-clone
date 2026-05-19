@@ -10,7 +10,15 @@ import shap
 import json
 import requests
 
-BASE_API_URL = os.environ.get("BACKEND_URL")
+def _resolve_base_api_url():
+    url = os.environ.get("BACKEND_URL", "").strip()
+    if not url:
+        return "http://localhost:5000"
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = f"http://{url}"
+    return url.rstrip("/")
+
+BASE_API_URL = _resolve_base_api_url()
 
 # Model
 class RecommenderNN(nn.Module):
@@ -29,7 +37,7 @@ class RecommenderNN(nn.Module):
 
 def fetch_group_members(group_id):
     url = f"{BASE_API_URL}/api/export/group_member/{group_id}"
-    res = requests.get(url)
+    res = requests.get(url, timeout=10)
 
     if res.status_code != 200:
         raise Exception("Failed to fetch group members")
@@ -54,6 +62,18 @@ def load_user_model(user_id):
     model.eval()
 
     return model, idx_to_song
+
+def _score_candidates_by_song_class(probs, all_songs_df, idx_to_song):
+    # Saved mapping is {class_idx: song_id_encoded}; invert for candidate lookup.
+    song_encoded_to_idx = {int(song_encoded): int(class_idx) for class_idx, song_encoded in idx_to_song.items()}
+    class_indices = all_songs_df["song_id_encoded"].map(song_encoded_to_idx).fillna(-1).astype(int).to_numpy()
+    row_indices = np.arange(len(all_songs_df))
+    valid_mask = class_indices >= 0
+
+    # Fallback for songs outside this user's mapped classes.
+    song_scores = probs.max(axis=1)
+    song_scores[valid_mask] = probs[row_indices[valid_mask], class_indices[valid_mask]]
+    return song_scores
 
 #def user_scores_and_shap(model, all_songs_df):
 #    X = torch.tensor(
@@ -87,11 +107,12 @@ def group_recommendation(user_ids, all_songs_df, alpha=0.7, top_n=10):
     score_list = []
 
     for uid in user_ids:
-        model, song_map = load_user_model(uid)
+        model, idx_to_song = load_user_model(uid)
         X = torch.tensor(all_songs_df[["genre_encoded", "language_encoded", "type_encoded"]].values, dtype=torch.float32)
         with torch.no_grad():
-            scores = torch.softmax(model(X), dim=1).max(dim=1).values.numpy()
-        score_list.append(scores)
+            probs = torch.softmax(model(X), dim=1).numpy()
+        song_scores = _score_candidates_by_song_class(probs, all_songs_df, idx_to_song)
+        score_list.append(song_scores)
 
     scores_np = np.vstack(score_list)
     avg_score = scores_np.mean(axis=0)
@@ -101,7 +122,12 @@ def group_recommendation(user_ids, all_songs_df, alpha=0.7, top_n=10):
     result = all_songs_df.copy()
     result["final_score"] = final_score
 
-    return result.sort_values("final_score", ascending=False).head(top_n)
+    return (
+        result
+        .drop_duplicates(subset=["song_id"])
+        .sort_values("final_score", ascending=False)
+        .head(top_n)
+    )
 
 def group_recommendation_DL(group_id):
     all_songs = pd.read_csv("group_playlist_randomforest/all_songs_encoded.csv")

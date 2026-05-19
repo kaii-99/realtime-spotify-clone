@@ -10,7 +10,15 @@ import shap
 import json
 import requests
 
-BASE_API_URL = os.environ.get("BACKEND_URL")
+def _resolve_base_api_url():
+    url = os.environ.get("BACKEND_URL", "").strip()
+    if not url:
+        return "http://localhost:5000"
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = f"http://{url}"
+    return url.rstrip("/")
+
+BASE_API_URL = _resolve_base_api_url()
 
 # Model
 class RecommenderNN(nn.Module):
@@ -29,7 +37,7 @@ class RecommenderNN(nn.Module):
 
 def fetch_group_members(group_id):
     url = f"{BASE_API_URL}/api/export/group_member/{group_id}"
-    res = requests.get(url)
+    res = requests.get(url, timeout=10)
 
     if res.status_code != 200:
         raise Exception("Failed to fetch group members")

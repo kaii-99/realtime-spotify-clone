@@ -6,7 +6,15 @@ import matplotlib.pyplot as plt
 import os
 import requests
 
-BASE_API_URL = os.environ.get("BACKEND_URL")
+def _resolve_base_api_url():
+    url = os.environ.get("BACKEND_URL", "").strip()
+    if not url:
+        return "http://localhost:5000"
+    if not url.startswith("http://") and not url.startswith("https://"):
+        url = f"http://{url}"
+    return url.rstrip("/")
+
+BASE_API_URL = _resolve_base_api_url()
 all_songs = pd.read_csv("all_songs_encoded.csv")
 genre_enc = joblib.load("genre_encoder.pkl")
 language_enc = joblib.load("language_encoder.pkl")
@@ -22,7 +30,7 @@ feature_names = [
 
 def fetch_group_members(group_id):
     url = f"{BASE_API_URL}/api/export/group_member/{group_id}"
-    res = requests.get(url)
+    res = requests.get(url, timeout=10)
 
     if res.status_code != 200:
         raise Exception("Failed to fetch group members")
@@ -41,13 +49,44 @@ def set_files(user_id):
     model_path = os.path.join("model", user_id, "song_recommendation_model.pkl")
     model = joblib.load(model_path)
 
-    explainer = shap.TreeExplainer(model)
-
     processed_data = pd.read_csv(os.path.join(PROCESSED_FOLDER, f"{USER_ID}_processed_data.csv"))
     processed_data.columns = processed_data.columns.str.strip()
 
     weather_enc = joblib.load(os.path.join(PROCESSED_FOLDER, "weather_encoder.pkl"))
     time_enc = joblib.load(os.path.join(PROCESSED_FOLDER, "timeofday_encoder.pkl"))
+
+    try:
+        feature_cols = [
+            "genre_encoded",
+            "language_encoded",
+            "type_encoded",
+            "weather_encoded",
+            "timeOfDay_encoded"
+        ]
+        background = processed_data[feature_cols].dropna().head(200)
+        explainer = shap.TreeExplainer(
+            model,
+            data=background,
+            feature_perturbation="interventional",
+            model_output="probability"
+        )
+    except Exception:
+        explainer = shap.TreeExplainer(model)
+
+def _extract_shap_for_pred_class(shap_values, pred_class):
+    values = shap_values.values
+
+    if values.ndim == 3:
+        return values[0, :, pred_class]
+
+    return values[0]
+
+def _sort_explanations_by_magnitude(entries):
+    return sorted(
+        entries,
+        key=lambda x: abs(float(x.rsplit("(", 1)[1].rstrip(")"))),
+        reverse=True
+    )
 
 def safe_transform(encoder, value):
     return encoder.transform([value])[0] if value in encoder.classes_ else 0
@@ -87,6 +126,8 @@ def decode_features(row):
         "Genre": genre_enc.inverse_transform([int(row[0])])[0],
         "Language": language_enc.inverse_transform([int(row[1])])[0],
         "Type": type_enc.inverse_transform([int(row[2])])[0],
+        "Weather": weather_enc.inverse_transform([int(row[3])])[0],
+        "Time Of Day": time_enc.inverse_transform([int(row[4])])[0],
     }
 
 def get_user_song_scores(user_id, weather, timeOfDay):
@@ -123,7 +164,7 @@ def explain_song_for_user(user_id, song_row, weather, timeOfDay):
     probs = model.predict_proba(X)[0]
     pred_class = np.argmax(probs)
 
-    values = shap_values.values[0, :, pred_class]
+    values = _extract_shap_for_pred_class(shap_values, pred_class)
 
     decoded = decode_features(X.iloc[0].values)
 
@@ -138,6 +179,9 @@ def explain_song_for_user(user_id, song_row, weather, timeOfDay):
             explanation["helped"].append(f"{fname}: {label} ({val:.3f})")
         elif val < 0:
             explanation["hurt"].append(f"{fname}: {label} ({val:.3f})")
+
+    explanation["helped"] = _sort_explanations_by_magnitude(explanation["helped"])
+    explanation["hurt"] = _sort_explanations_by_magnitude(explanation["hurt"])
 
     return explanation
 
@@ -178,7 +222,7 @@ def recommend_group_playlist(group_id, weather, timeOfDay, top_n=10, alpha=0.7):
 
     group_scores = aggregate_group_scores(all_user_scores, alpha)
 
-    return group_scores.head(top_n)
+    return group_scores.drop_duplicates(subset=["song_id"]).head(top_n)
 
 def explain_group_song(group_id, song_id, weather, timeOfDay, alpha=0.7):
     members = fetch_group_members(group_id)
@@ -215,7 +259,9 @@ def explain_group_song(group_id, song_id, weather, timeOfDay, alpha=0.7):
 # testuser3 -> 690f66bf822864ba799ef3fc
 
 # Group Id
-# 6932fb410eace21333076758
+# Group 3 - 6988970699e88120d6eae39b
+# Group 2 - 6988958d99e88120d6eae287
+# Group 1 - 6932fb410eace21333076758
 
 # Weather Conditions
 # Clouds
@@ -225,29 +271,30 @@ def explain_group_song(group_id, song_id, weather, timeOfDay, alpha=0.7):
 # day
 # night
 
-group_results = recommend_group_playlist(
-    group_id="6932fb410eace21333076758",
-    weather="Clouds",
-    timeOfDay="night",
-    top_n=10,
-    alpha=0.7,
-) 
+if __name__ == "__main__":
+    group_results = recommend_group_playlist(
+        group_id="6988970699e88120d6eae39b",
+        weather="Clouds",
+        timeOfDay="night",
+        top_n=10,
+        alpha=0.7,
+    )
 
-for i, row in group_results.iterrows():
-    print(f"Song ID: {row['song_id']} | Final Score: {row['final_score']:.4f}")
+    for _, row in group_results.iterrows():
+        print(f"Song ID: {row['song_id']} | Final Score: {row['final_score']:.4f}")
 
-top_song_id = group_results.iloc[0]["song_id"]
+    top_song_id = group_results.iloc[0]["song_id"]
 
-group_explanation = explain_group_song(
-    group_id="6932fb410eace21333076758",
-    song_id=top_song_id,
-    weather="Rain",
-    timeOfDay="night"
-)
+    group_explanation = explain_group_song(
+        group_id="6932fb410eace21333076758",
+        song_id=top_song_id,
+        weather="Clouds",
+        timeOfDay="night"
+    )
 
-print("GROUP EXPLANATION")
-print("Helped by:", group_explanation["helped"])
-print("Hurt by:", group_explanation["hurt"])
+    print("GROUP EXPLANATION")
+    print("Helped by:", group_explanation["helped"])
+    print("Hurt by:", group_explanation["hurt"])
 
 ##for r in results:
 ##    print(f"\nSong ID: {r['song_id']} | Score: {r['score']:.3f}")
